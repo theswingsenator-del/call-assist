@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
+/* ── Call Assist design tokens · live-ops ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ground: #0a0c10;
+  --panel: rgba(230, 236, 245, 0.045);
+  --panel-strong: rgba(230, 236, 245, 0.08);
+  --line: rgba(230, 236, 245, 0.1);
+  --ink: #e9edf3;
+  --ink-dim: #97a1b0;
+  --ink-faint: #56606f;
+  --signal: #34e0a1;
+  --signal-deep: #17916a;
+  --rec: #ff5c5c;
+  --rec-deep: #b5302f;
+  --background: var(--ground);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: #e9edf3;
+  --color-ink-dim: #97a1b0;
+  --color-ink-faint: #56606f;
+  --color-signal: #34e0a1;
+  --color-signal-deep: #17916a;
+  --color-rec: #ff5c5c;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ground);
+  color: var(--ink);
+  overscroll-behavior-y: none;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+
+.app-bg {
+  background:
+    radial-gradient(ellipse 85% 40% at 50% -10%, rgba(52, 224, 161, 0.1), transparent 60%),
+    radial-gradient(ellipse 60% 35% at 90% 100%, rgba(255, 92, 92, 0.05), transparent 55%),
+    #0a0c10;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(230, 236, 245, 0.04), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.panel-strong {
+  background: var(--panel-strong);
+  border: 1px solid rgba(230, 236, 245, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 0 rgba(230, 236, 245, 0.06), 0 4px 24px -8px rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary {
+  background: linear-gradient(155deg, #52f0b6, #34e0a1 45%, #17916a);
+  color: #04140d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -6px 12px -6px rgba(0, 0, 0, 0.25),
+    0 12px 32px -10px rgba(52, 224, 161, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn-primary:active { transform: scale(0.98); filter: brightness(0.96); }
+.btn-primary:disabled { opacity: 0.5; filter: grayscale(0.4); }
+
+.mono-label {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.rec-btn {
+  width: 88px;
+  height: 88px;
+  border-radius: 9999px;
+  border: none;
+  background: linear-gradient(155deg, #ff7a7a, var(--rec) 50%, var(--rec-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 0 0 8px rgba(255, 92, 92, 0.12),
+    0 12px 30px -10px rgba(255, 92, 92, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.rec-btn:active { transform: scale(0.96); }
+.rec-btn.recording {
+  background: linear-gradient(155deg, #52f0b6, var(--signal) 50%, var(--signal-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 0 0 8px rgba(52, 224, 161, 0.16),
+    0 12px 30px -10px rgba(52, 224, 161, 0.55);
+  animation: rec-pulse 1.3s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 8px rgba(52, 224, 161, 0.16), 0 12px 30px -10px rgba(52, 224, 161, 0.55); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 16px rgba(52, 224, 161, 0.06), 0 12px 30px -10px rgba(52, 224, 161, 0.55); }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+
+@keyframes caret-blink { 50% { opacity: 0; } }
+.caret::after {
+  content: "▍";
+  opacity: 0.65;
+  animation: caret-blink 1s step-start infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .rec-btn.recording, .caret::after { animation: none; }
+}
+
+h1, h2 { text-wrap: balance; letter-spacing: -0.015em; }
+input, select, textarea { font-size: 16px; } /* stop iOS zoom-on-focus */
+::selection { background: rgba(52, 224, 161, 0.35); }
