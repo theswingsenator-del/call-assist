@@ -24,7 +24,7 @@ function pickMime(): string {
   return "";
 }
 
-export default function RecordPanel({ orgLabel }: { orgLabel: string }) {
+export default function RecordPanel({ brief, orgLabel }: { brief: string; orgLabel: string }) {
   const [items, setItems] = useState<QA[]>([]);
   const [recording, setRecording] = useState(false);
   const [status, setStatus] = useState("Tap to record");
@@ -76,6 +76,7 @@ export default function RecordPanel({ orgLabel }: { orgLabel: string }) {
 
     const form = new FormData();
     form.append("audio", blob, "clip.webm");
+    form.append("brief", brief);
 
     try {
       const res = await fetch("/api/ask", { method: "POST", body: form });

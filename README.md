@@ -11,44 +11,32 @@ any live Q&A context (support, onboarding calls, interviews you're conducting, e
 ## Stack
 
 - **Next.js 16** (App Router, TypeScript, Tailwind v4) — installable PWA (manifest + service worker)
-- **Supabase** — per-device session (cookie token → `sessions` row holding the briefing) + `calls`
-  log for every question/answer pair with timing, for auditing speed and accuracy after the fact
+- **No database.** The briefing lives in `localStorage` on the agent's device and rides along with
+  each `/api/ask` request. No login, no server state, nothing for the client's org to provision —
+  matches the trust model (it's on the agent's own phone, in the open).
 - **Groq** — `whisper-large-v3-turbo` for transcription, `llama-3.3-70b-versatile` for the answer,
-  both chosen for raw inference speed since latency is the whole point of the tool
+  both chosen for raw inference speed since latency is the whole point of the tool.
 
 ## Flow
 
-1. Paste/upload the session briefing → `POST /api/session` stores it against a per-device cookie
-   token (survives reloads/reinstalls of the tab, not tied to a login).
+1. Paste/upload the session briefing → saved to `localStorage` (survives reloads and app restarts;
+   "Edit briefing" to change it).
 2. Tap record → mic captures the caller's question via `MediaRecorder`.
-3. Tap again → clip posts to `POST /api/ask`, which streams back over SSE:
+3. Tap again → clip + brief post to `POST /api/ask`, which streams back over SSE:
    - the transcript, as soon as Whisper returns it
    - the answer, token by token, as Llama generates it
    - a timing frame (`transcribeMs` / `answerMs` / `totalMs`) so real latency is visible, not guessed
-4. Every Q&A pair also gets logged to `calls` (fire-and-forget, never blocks the on-screen response).
 
 ## Setup
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in Supabase + Groq keys
+cp .env.example .env.local   # add GROQ_API_KEY
 npm run dev
 ```
 
-Run `supabase/schema.sql` against your Supabase project before first use — the app degrades to a
-"database not configured" state (briefing won't persist, `/api/ask` 400s) until that's done and the
-env vars are set.
-
-### Env vars
-
-| Var | Where |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | same |
-| `SUPABASE_SERVICE_ROLE_KEY` | same — server-only, all writes go through this, never the anon key |
-| `GROQ_API_KEY` | console.groq.com |
+Only one env var: `GROQ_API_KEY` (from console.groq.com).
 
 ## Deploy
 
-Same as every other project on this stack: push to a GitHub repo, import into Vercel, set the env
-vars above in the Vercel project settings.
+Push to a GitHub repo, import into Vercel, set `GROQ_API_KEY` in the Vercel project settings.
