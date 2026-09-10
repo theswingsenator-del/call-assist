@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BriefForm from "./BriefForm";
 import RecordPanel from "./RecordPanel";
+import { loadBrief, saveBrief } from "@/lib/brief";
 
-interface Props {
-  initialBrief: string;
-  initialOrgLabel: string;
-  dbConfigured: boolean;
-}
+export default function Shell() {
+  const [brief, setBrief] = useState("");
+  const [orgLabel, setOrgLabel] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
-export default function Shell({ initialBrief, initialOrgLabel, dbConfigured }: Props) {
-  const [brief, setBrief] = useState(initialBrief);
-  const [orgLabel, setOrgLabel] = useState(initialOrgLabel);
-  const [editing, setEditing] = useState(!initialBrief);
+  useEffect(() => {
+    const stored = loadBrief();
+    setBrief(stored.brief);
+    setOrgLabel(stored.orgLabel);
+    setEditing(!stored.brief);
+    setHydrated(true);
+  }, []);
 
   const hasBrief = Boolean(brief) && !editing;
 
@@ -31,17 +35,17 @@ export default function Shell({ initialBrief, initialOrgLabel, dbConfigured }: P
         )}
       </header>
 
-      {hasBrief ? (
-        <RecordPanel orgLabel={orgLabel} />
+      {!hydrated ? null : hasBrief ? (
+        <RecordPanel brief={brief} orgLabel={orgLabel} />
       ) : (
         <BriefForm
           initialBrief={brief}
           initialOrgLabel={orgLabel}
-          dbConfigured={dbConfigured}
           onCancel={brief ? () => setEditing(false) : undefined}
-          onSaved={(savedBrief, savedOrgLabel) => {
-            setBrief(savedBrief);
-            setOrgLabel(savedOrgLabel);
+          onSaved={(nextBrief, nextOrgLabel) => {
+            setBrief(nextBrief);
+            setOrgLabel(nextOrgLabel);
+            saveBrief({ brief: nextBrief, orgLabel: nextOrgLabel });
             setEditing(false);
           }}
         />

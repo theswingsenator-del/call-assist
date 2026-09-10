@@ -12,7 +12,7 @@ export function getGroqClient(): Groq {
 }
 
 export const TRANSCRIBE_MODEL = "whisper-large-v3-turbo";
-export const ANSWER_MODEL = "llama-3.3-70b-versatile";
+export const ANSWER_MODEL = "openai/gpt-oss-120b";
 
 export function buildSystemPrompt(brief: string): string {
   return `You are a live-call answer assistant. The person using you is on a real call right now \

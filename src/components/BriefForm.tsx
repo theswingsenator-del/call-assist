@@ -5,40 +5,35 @@ import { useState } from "react";
 interface Props {
   initialBrief: string;
   initialOrgLabel: string;
-  dbConfigured: boolean;
   onSaved: (brief: string, orgLabel: string) => void;
   onCancel?: () => void;
 }
 
-export default function BriefForm({ initialBrief, initialOrgLabel, dbConfigured, onSaved, onCancel }: Props) {
+export default function BriefForm({ initialBrief, initialOrgLabel, onSaved, onCancel }: Props) {
   const [text, setText] = useState(initialBrief);
   const [orgLabel, setOrgLabel] = useState(initialOrgLabel);
-  const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  async function save() {
-    if (!text.trim() && !file) {
+  async function handleFile(file: File | null) {
+    if (!file) return;
+    try {
+      const content = await file.text();
+      setText((prev) => [prev.trim(), content.trim()].filter(Boolean).join("\n\n"));
+    } catch {
+      setError("Couldn't read that file.");
+    }
+  }
+
+  function save() {
+    if (!text.trim()) {
       setError("Give it something to work with first.");
       return;
     }
     setSaving(true);
     setError("");
-    const form = new FormData();
-    form.append("text", text);
-    form.append("orgLabel", orgLabel);
-    if (file) form.append("file", file);
-
-    try {
-      const res = await fetch("/api/session", { method: "POST", body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Save failed");
-      onSaved(text.trim() + (file ? `\n\n[+ ${file.name}]` : ""), orgLabel.trim());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
-    } finally {
-      setSaving(false);
-    }
+    onSaved(text.trim(), orgLabel.trim());
+    setSaving(false);
   }
 
   return (
@@ -46,15 +41,9 @@ export default function BriefForm({ initialBrief, initialOrgLabel, dbConfigured,
       <div>
         <p className="mono-label mb-2">Session briefing</p>
         <p className="text-sm text-ink-dim leading-relaxed">
-          Paste or upload what it should know before the call — org info, product, policy, prior conversation. It only answers from this.
+          Paste or upload what it should know before the call — org info, product, policy, prior conversation. It only answers from this. Stays on this device.
         </p>
       </div>
-
-      {!dbConfigured && (
-        <div className="panel rounded-xl px-4 py-3 text-xs text-ink-dim">
-          Database isn&apos;t wired up yet — briefing won&apos;t persist across reloads until Supabase env vars are set.
-        </div>
-      )}
 
       <input
         value={orgLabel}
@@ -72,12 +61,12 @@ export default function BriefForm({ initialBrief, initialOrgLabel, dbConfigured,
 
       <label className="panel rounded-xl px-4 py-3 text-xs text-ink-dim flex items-center gap-3 cursor-pointer">
         <span className="mono-label text-ink-dim! shrink-0">FILE</span>
-        <span className="truncate">{file ? file.name : "optional .txt/.md upload"}</span>
+        <span className="truncate">append a .txt/.md file</span>
         <input
           type="file"
           accept=".txt,.md"
           className="hidden"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
         />
       </label>
 
