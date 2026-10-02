@@ -79,7 +79,7 @@ export default function InstallPrompt() {
 
   return (
     <>
-      <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
+      <div className="fixed top-[calc(env(safe-area-inset-top)+4rem)] left-0 right-0 z-40 px-4 rise">
         <div className="panel-strong rounded-[22px] px-4 py-3.5 max-w-md mx-auto flex items-center gap-3 shadow-[0_12px_44px_-8px_rgba(0,0,0,0.85)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/icon-192.png" alt="" className="w-10 h-10 rounded-xl border border-signal/30 shrink-0" />
