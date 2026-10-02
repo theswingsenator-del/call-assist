@@ -1,4 +1,4 @@
-const CACHE = "call-assist-v1";
+const CACHE = "call-assist-v2";
 const CORE_ASSETS = ["/", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
