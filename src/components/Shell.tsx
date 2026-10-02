@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import BriefForm from "./BriefForm";
 import RecordPanel from "./RecordPanel";
-import { loadBrief, saveBrief } from "@/lib/brief";
+import { loadBrief, saveBrief, clearBrief } from "@/lib/brief";
 
 export default function Shell() {
   const [brief, setBrief] = useState("");
@@ -21,21 +21,48 @@ export default function Shell() {
 
   const hasBrief = Boolean(brief) && !editing;
 
+  function endSession() {
+    clearBrief();
+    setBrief("");
+    setOrgLabel("");
+    setEditing(true);
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      {/* Header */}
       <header className="flex items-center justify-between px-5 py-4 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-signal shadow-[0_0_8px_rgba(52,224,161,0.7)]" />
-          <h1 className="text-[15px] font-bold tracking-tight">Call Assist</h1>
+        <div className="flex items-center gap-2.5">
+          <div className="relative">
+            <span className="block w-2.5 h-2.5 rounded-full bg-signal" />
+            <span className="absolute inset-0 rounded-full bg-signal animate-ping opacity-20" />
+          </div>
+          <h1 className="text-base font-bold tracking-tight">Call Assist</h1>
         </div>
         {hasBrief && (
-          <button onClick={() => setEditing(true)} className="mono-label text-ink-dim!">
-            Edit briefing
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setEditing(true)}
+              className="mono-label text-ink-dim! hover:text-ink! transition-colors"
+            >
+              Edit
+            </button>
+            <span className="w-px h-3 bg-line" />
+            <button
+              onClick={endSession}
+              className="mono-label text-rec/70 hover:text-rec! transition-colors"
+            >
+              End
+            </button>
+          </div>
         )}
       </header>
 
-      {!hydrated ? null : hasBrief ? (
+      {!hydrated ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="spinner" />
+        </div>
+      ) : hasBrief ? (
         <RecordPanel brief={brief} orgLabel={orgLabel} />
       ) : (
         <BriefForm
