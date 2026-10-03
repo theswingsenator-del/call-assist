@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_ID: buildId,
   },
   async headers() {
+    const cors = [
+      { key: "Access-Control-Allow-Origin", value: "*" },
+      { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
+      { key: "Access-Control-Allow-Headers", value: "*" },
+    ];
     return [
       {
         source: "/sw.js",
@@ -22,6 +27,7 @@ const nextConfig: NextConfig = {
         source: "/pdf.worker.min.mjs",
         headers: [{ key: "Content-Type", value: "application/javascript; charset=utf-8" }],
       },
+      { source: "/api/:path*", headers: cors },
     ];
   },
 };
