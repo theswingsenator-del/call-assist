@@ -1,8 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getGroqClient, buildSystemPrompt, TRANSCRIBE_MODEL, ANSWER_MODEL } from "@/lib/groq";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
+}
 
 const MAX_BRIEF_CHARS = 400_000;
 const MAX_HISTORY = 4;

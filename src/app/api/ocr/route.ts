@@ -4,6 +4,10 @@ import { getGroqClient, VISION_MODEL } from "@/lib/groq";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
+}
+
 const MAX_BYTES = 4 * 1024 * 1024;
 
 const PROMPT = `Transcribe ALL text on this document page exactly as written, top to bottom, left to right.
