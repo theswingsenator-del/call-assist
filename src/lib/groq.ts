@@ -12,7 +12,7 @@ export function getGroqClient(): Groq {
 }
 
 export const TRANSCRIBE_MODEL = "whisper-large-v3-turbo";
-export const ANSWER_MODEL = "llama-3.3-70b-versatile";
+export const ANSWER_MODEL = "openai/gpt-oss-20b";
 export const VISION_MODEL = "qwen/qwen3.8-27b";
 
 export function buildSystemPrompt(brief: string): string {
