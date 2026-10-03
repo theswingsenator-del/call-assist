@@ -93,9 +93,6 @@ export async function POST(req: NextRequest) {
           ],
           temperature: 0.4,
           max_tokens: 600,
-          // gpt-oss is a reasoning model — keep it on the lowest setting so it
-          // spends tokens on the answer, not deliberation. Speed is the point.
-          reasoning_effort: "low",
           stream: true,
         });
 
