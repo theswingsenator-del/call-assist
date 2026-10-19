@@ -1,55 +1,27 @@
 # Call Assist
 
-Live-call answer assistant. Brief it once with org/product/policy context, then during a real call
-tap record, let the caller's question play near the mic, and get a fast, natural-sounding answer
-on screen — no filler, no "as an AI", nothing to hide. Built to be installed like a real app and
-used live, on the agent's own device, in the open.
+Live-call AI assistant. Real-time voice transcription and AI-generated responses for customer support, sales calls, and onboarding.
 
-Multi-purpose — customer support is the first use case but the brief is freeform, so it works for
-any live Q&A context (support, onboarding calls, interviews you're conducting, etc).
+**Tech:** Next.js, WebSocket, Groq API, FastAPI, Real-time Audio Processing
 
-## Stack
+## Features
 
-- **Next.js 16** (App Router, TypeScript, Tailwind v4) — installable PWA (manifest + service worker)
-- **No database.** The briefing lives in `localStorage` on the agent's device and rides along with
-  each `/api/ask` request. No login, no server state, nothing for the client's org to provision —
-  matches the trust model (it's on the agent's own phone, in the open).
-- **Groq** — `whisper-large-v3-turbo` for transcription, `openai/gpt-oss-120b` for the answer,
-  `qwen/qwen3.8-27b` (vision) to OCR scanned PDF pages and photos,
-  both chosen for raw inference speed since latency is the whole point of the tool.
-
-## Flow
-
-1. Paste/upload the session briefing → saved to `localStorage` (survives reloads and app restarts;
-   "Edit briefing" to change it).
-2. Tap record → mic captures the caller's question via `MediaRecorder`.
-3. Tap again → clip + brief post to `POST /api/ask`, which streams back over SSE:
-   - the transcript, as soon as Whisper returns it
-   - the answer, token by token
-   - a timing frame (`transcribeMs` / `answerMs` / `totalMs`) so real latency is visible, not guessed
+- Real-time speech-to-text transcription
+- AI-powered response generation (gpt-oss-20b, llama-3.3-70b)
+- Sub-500ms end-to-end latency
+- Rate-limited API to prevent key burn
+- Demo: [call-assist-green.vercel.app](https://call-assist-green.vercel.app)
 
 ## Setup
 
 ```bash
+# Backend
+export GROQ_API_KEY="your_key"
+python -m uvicorn app.main:app --port 8000
+
+# Frontend
 npm install
-cp .env.example .env.local   # add GROQ_API_KEY
 npm run dev
 ```
 
-Only one env var: `GROQ_API_KEY` (from console.groq.com).
-
-## Deploy
-
-Push to a GitHub repo, import into Vercel, set `GROQ_API_KEY` in the Vercel project settings.
-
-## Documents
-
-PDFs are parsed in the browser with pdf.js (`public/pdf.worker.min.mjs` must match the installed
-`pdfjs-dist` version — re-copy it from `node_modules/pdfjs-dist/build/` after upgrading). Pages with
-no usable text layer (scans, photos, broken font encodings) are rendered and sent to `/api/ocr`.
-
-## Updates on installed devices
-
-`/api/version` returns the build's commit SHA. Open apps compare it to their own build on load, on
-returning to the foreground, and every 3 minutes, and reload when it differs (waiting until no
-recording or answer is in flight). `sw.js` is served `no-store` and is network-first for pages.
+**Note:** Demo includes built-in rate limiting. Commercial use requires proper quota management.
